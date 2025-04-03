@@ -1,0 +1,46 @@
+ACME CORPORATION
+123 Business Street
+Businessville, CA 90210
+Phone: (555) 123-4567
+
+================================
+INVOICE
+================================
+
+Invoice Number: INV-2023-0042
+Date: May 15, 2023
+Due Date: June 15, 2023
+
+BILL TO:
+Global Enterprises Ltd.
+456 Corporate Ave
+Finance City, NY 10001
+Client ID: GE-789-01
+
+================================
+PRODUCT DETAILS
+================================
+
+Item                    Quantity    Unit Price    Amount
+-----------------------------------------------------------------
+Server Hosting              12       $149.99     $1,799.88
+Domain Registration          1        $15.99       $15.99
+Premium Support Package      1       $299.99      $299.99
+Database Storage (500GB)     6        $49.99      $299.94
+-----------------------------------------------------------------
+                                     Subtotal:   $2,415.80
+                                     Tax (8%):     $193.26
+                                  Total Amount:  $2,609.06
+
+================================
+PAYMENT DETAILS
+================================
+
+Payment Method: Corporate Credit Card
+Payment Terms: Net 30
+Payment Instructions: Please reference Invoice Number INV-2023-0042
+
+For questions regarding this invoice, please contact:
+accounting@acmecorp.com
+
+Thank you for your business! 

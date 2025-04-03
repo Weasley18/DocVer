@@ -1,0 +1,62 @@
+SOFTWARE CHANGE NOTICE
+=============================
+
+Software: SoftwareX
+Version: 1.2
+Release Date: March 10, 2023
+Previous Version: 1.1
+
+=============================
+NEW FEATURES
+=============================
+
+1. Advanced Search Functionality: Implemented full-text search with filtering options.
+2. Dark Mode Support: Added system-wide dark mode with automatic detection of OS preferences.
+3. API Rate Limiting: Improved system stability with configurable API request limits.
+4. Multi-language Support: Added support for Spanish, French, and German.
+5. File Export Options: New export formats including PDF, CSV, and JSON.
+
+=============================
+RESOLVED ISSUES
+=============================
+
+1. Fixed memory leak when processing large datasets.
+2. Corrected sorting algorithm in the data grid component.
+3. Resolved authentication issue with SSO providers.
+4. Fixed incorrect timezone calculations for international users.
+5. Patched security vulnerability in the file upload component.
+6. Corrected calculation errors in reporting module.
+7. Fixed UI rendering issues in the dashboard on mobile devices.
+
+=============================
+KNOWN ISSUES
+=============================
+
+1. Dashboard widgets may load slowly on low-bandwidth connections.
+2. PDF exports may have formatting issues with complex tables.
+3. Some third-party integrations require manual reconnection after update.
+4. Performance degradation observed with datasets exceeding 1 million records.
+
+=============================
+SYSTEM REQUIREMENTS
+=============================
+
+- Operating System: Windows 10+, macOS 11+, or Linux (kernel 5.4+)
+- RAM: Minimum 8GB, Recommended 16GB
+- Storage: 500MB free space
+- Dependencies: .NET Runtime 6.0 or higher
+
+=============================
+INSTALLATION INSTRUCTIONS
+=============================
+
+1. Backup your existing configuration.
+2. Download the update package from the customer portal.
+3. Run the installer and follow the on-screen instructions.
+4. Restart the application after installation.
+
+For detailed instructions, please refer to the Documentation Portal.
+
+=============================
+CONTACT INFORMATION
+============================= 

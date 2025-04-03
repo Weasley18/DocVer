@@ -1,0 +1,7 @@
+SoftwareName,Version,DependsOnSoftware,DependsOnVersion
+SoftwareA,2.0,SoftwareB,2.1+
+SoftwareA,2.0,SoftwareC,3.5+
+SoftwareB,2.1,SoftwareC,3.0+
+SoftwareB,2.2,SoftwareC,3.2+
+SoftwareC,3.2,,
+SoftwareC,3.5,, 
