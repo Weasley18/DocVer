@@ -1,0 +1,11 @@
+team name :- dal bati churma
+
+problem statement :- Demonstrate a document crawler and analyzer using Agentic Al framework which can scale to perform various tasks
+
+college name :- RNS INSTITUTE OF TECHNOLOGY
+
+team member:-
+cezzan rangrej,  cezzanrangrej23csds@rnsit.ac.in,  9588048151
+aryan saini ,  aryansaini23cs@rnsit.ac.in, 9610937743
+harsh ringsia, harshringsia23cy@rnsit.ac.in, 7439746027
+sanjana shetty, sanjanashetty23csds@rnsit.ac.in, 9902030158
