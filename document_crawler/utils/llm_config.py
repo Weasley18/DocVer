@@ -49,7 +49,7 @@ def create_agent(role, goal, backstory, verbose=True, allow_delegation=False):
     # Create Chat model using ChatOpenAI pointing to Groq's API
     # Groq provides OpenAI API compatibility
     llm = ChatOpenAI(
-        model="llama3-70b-8192",
+        model="groq/llama3-70b-8192",
         temperature=0.2,
         openai_api_key=GROQ_API_KEY,
         openai_api_base="https://api.groq.com/openai/v1",

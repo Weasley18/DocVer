@@ -37,7 +37,7 @@ def create_document_agent(verbose=True, allow_delegation=False):
     
     # Use ChatOpenAI with Groq's API (they have OpenAI API compatibility)
     llm = ChatOpenAI(
-        model="llama3-70b-8192", 
+        model="groq/llama3-70b-8192", 
         temperature=0.2,
         openai_api_key=GROQ_API_KEY,
         openai_api_base="https://api.groq.com/openai/v1"

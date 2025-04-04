@@ -89,71 +89,188 @@ elif page == "Critical Information Extraction":
                     
                     # Display the results
                     if os.path.exists(output_file):
-                        df = pd.read_csv(output_file)
-                        st.success(f"Successfully extracted information from {len(uploaded_files)} documents.")
-                        
-                        # Create tabs for different view modes
-                        tab1, tab2, tab3 = st.tabs(["Table View", "Document View", "JSON View"])
-                        
-                        with tab1:
-                            # Table view (improved dataframe display)
-                            st.subheader("Extracted Data - Table Format")
-                            st.dataframe(
-                                df,
-                                use_container_width=True,
-                                column_config={
-                                    "File": st.column_config.TextColumn("Document", width="medium"),
-                                    **{field: st.column_config.TextColumn(field, width="large") for field in fields}
-                                }
-                            )
-                        
-                        with tab2:
-                            # Document-centric view
-                            st.subheader("Extracted Data - By Document")
-                            for doc_file in df["File"].unique():
-                                doc_data = df[df["File"] == doc_file]
-                                with st.expander(f"📄 {doc_file}"):
-                                    for field in fields:
-                                        if field in doc_data.columns:
-                                            field_value = doc_data[field].values[0]
-                                            st.markdown(f"**{field}**")
-                                            st.markdown(f"{field_value}")
-                                            st.divider()
-                        
-                        with tab3:
-                            # JSON view
-                            st.subheader("Extracted Data - JSON Format")
-                            # Convert to JSON with document filenames as keys
-                            json_data = {}
-                            for doc_file in df["File"].unique():
-                                doc_data = df[df["File"] == doc_file].iloc[0].to_dict()
-                                json_data[doc_file] = {k: v for k, v in doc_data.items() if k != "File"}
+                        try:
+                            df = pd.read_csv(output_file)
                             
-                            st.json(json_data)
-                        
-                        # Download options
-                        st.subheader("Download Options")
-                        col1, col2 = st.columns(2)
-                        
-                        with col1:
-                            # CSV download
-                            with open(output_file, "rb") as file:
-                                st.download_button(
-                                    label="Download CSV",
-                                    data=file,
-                                    file_name="extracted_data.csv",
-                                    mime="text/csv",
-                                )
-                        
-                        with col2:
-                            # JSON download
-                            json_str = json.dumps(json_data, indent=2)
-                            st.download_button(
-                                label="Download JSON",
-                                data=json_str,
-                                file_name="extracted_data.json",
-                                mime="application/json",
-                            )
+                            # Check if we have any data
+                            if len(df) > 0:
+                                st.success(f"Successfully extracted information from {len(uploaded_files)} documents.")
+                                
+                                # Create tabs for different view modes
+                                tab1, tab2, tab3 = st.tabs(["Table View", "Document View", "JSON View"])
+                                
+                                with tab1:
+                                    # Table view (improved dataframe display)
+                                    st.subheader("Extracted Data - Table Format")
+                                    st.dataframe(
+                                        df,
+                                        use_container_width=True,
+                                        column_config={
+                                            "File": st.column_config.TextColumn("Document", width="medium"),
+                                            **{field: st.column_config.TextColumn(field, width="large") for field in fields}
+                                        }
+                                    )
+                                
+                                with tab2:
+                                    # Document-centric view
+                                    st.subheader("Extracted Data - By Document")
+                                    for doc_file in df["File"].unique():
+                                        doc_data = df[df["File"] == doc_file]
+                                        with st.expander(f"📄 {doc_file}"):
+                                            for field in fields:
+                                                if field in doc_data.columns:
+                                                    field_value = doc_data[field].values[0]
+                                                    st.markdown(f"**{field}**")
+                                                    st.markdown(f"{field_value}")
+                                                    st.divider()
+                                
+                                with tab3:
+                                    # JSON view
+                                    st.subheader("Extracted Data - JSON Format")
+                                    # Convert to JSON with document filenames as keys
+                                    json_data = {}
+                                    for doc_file in df["File"].unique():
+                                        doc_data = df[df["File"] == doc_file].iloc[0].to_dict()
+                                        json_data[doc_file] = {k: v for k, v in doc_data.items() if k != "File"}
+                                    
+                                    st.json(json_data)
+                                
+                                # Download options
+                                st.subheader("Download Options")
+                                col1, col2 = st.columns(2)
+                                
+                                with col1:
+                                    # CSV download
+                                    with open(output_file, "rb") as file:
+                                        st.download_button(
+                                            label="Download CSV",
+                                            data=file,
+                                            file_name="extracted_data.csv",
+                                            mime="text/csv",
+                                        )
+                                
+                                with col2:
+                                    # JSON download
+                                    json_str = json.dumps(json_data, indent=2)
+                                    st.download_button(
+                                        label="Download JSON",
+                                        data=json_str,
+                                        file_name="extracted_data.json",
+                                        mime="application/json",
+                                    )
+                            else:
+                                # Try to load from JSON if CSV is empty
+                                json_output_file = output_file.replace('.csv', '.json')
+                                if os.path.exists(json_output_file):
+                                    try:
+                                        with open(json_output_file, 'r') as f:
+                                            json_data = json.load(f)
+                                        
+                                        if json_data:
+                                            st.success(f"Successfully extracted information from {len(uploaded_files)} documents.")
+                                            st.subheader("Extracted Data - JSON Format")
+                                            st.json(json_data)
+                                            
+                                            # Convert JSON to DataFrame for download
+                                            df = pd.DataFrame(json_data)
+                                            
+                                            # Download options
+                                            st.subheader("Download Options")
+                                            json_str = json.dumps(json_data, indent=2)
+                                            st.download_button(
+                                                label="Download JSON",
+                                                data=json_str,
+                                                file_name="extracted_data.json",
+                                                mime="application/json",
+                                            )
+                                        else:
+                                            # Check for raw output files
+                                            raw_files = [f for f in os.listdir(temp_dir) if f.startswith("raw_output_")]
+                                            if raw_files:
+                                                st.subheader("Raw Extraction Results")
+                                                st.info("Showing raw extraction results:")
+                                                
+                                                for raw_file in raw_files:
+                                                    with st.expander(f"Raw data from: {raw_file.replace('raw_output_', '')}"):
+                                                        try:
+                                                            with open(os.path.join(temp_dir, raw_file), 'r', encoding='utf-8') as f:
+                                                                raw_content = f.read()
+                                                            
+                                                            # Check if content contains a "List of Issues" section
+                                                            if "List of Issues" in raw_content or "list of issues" in raw_content.lower():
+                                                                st.markdown("### Extracted List of Issues:")
+                                                                # Try to find and format the list content
+                                                                import re
+                                                                list_section = re.search(r'"List of Issues"\s*:\s*"(.*?)"(?:,|\})', raw_content, re.DOTALL | re.IGNORECASE)
+                                                                if list_section:
+                                                                    issues_content = list_section.group(1).replace('\\n', '\n').replace('\\"', '"')
+                                                                    st.markdown(issues_content)
+                                                                else:
+                                                                    st.text(raw_content)
+                                                            else:
+                                                                # Try to extract JSON part
+                                                                import re
+                                                                json_match = re.search(r'(\{.*\})', raw_content, re.DOTALL)
+                                                                if json_match:
+                                                                    try:
+                                                                        json_data = json.loads(json_match.group(1))
+                                                                        st.json(json_data)
+                                                                    except Exception:
+                                                                        st.text(raw_content)
+                                                                else:
+                                                                    st.text(raw_content)
+                                                        except Exception as file_error:
+                                                            st.error(f"Error reading raw file: {str(file_error)}")
+                                            else:
+                                                st.warning("No data was extracted from the documents.")
+                                    except Exception as e:
+                                        st.warning(f"Could not parse JSON results: {str(e)}")
+                                        
+                                        # Try raw files as a fallback
+                                        raw_files = [f for f in os.listdir(temp_dir) if f.startswith("raw_output_")]
+                                        if raw_files:
+                                            st.subheader("Raw Extraction Results")
+                                            st.info("Showing raw extraction results as fallback:")
+                                            
+                                            for raw_file in raw_files:
+                                                with st.expander(f"Raw data from: {raw_file.replace('raw_output_', '')}"):
+                                                    try:
+                                                        with open(os.path.join(temp_dir, raw_file), 'r', encoding='utf-8') as f:
+                                                            st.text(f.read())
+                                                    except Exception as file_error:
+                                                        st.error(f"Error reading raw file: {str(file_error)}")
+                                else:
+                                    # Check for raw output files
+                                    raw_files = [f for f in os.listdir(temp_dir) if f.startswith("raw_output_")]
+                                    if raw_files:
+                                        st.subheader("Raw Extraction Results")
+                                        st.info("Showing raw extraction results:")
+                                        
+                                        for raw_file in raw_files:
+                                            with st.expander(f"Raw data from: {raw_file.replace('raw_output_', '')}"):
+                                                try:
+                                                    with open(os.path.join(temp_dir, raw_file), 'r', encoding='utf-8') as f:
+                                                        st.text(f.read())
+                                                except Exception as file_error:
+                                                    st.error(f"Error reading raw file: {str(file_error)}")
+                                    else:
+                                        st.warning("No data was extracted from the documents.")
+                        except Exception as e:
+                            st.warning(f"Could not parse detailed results: {str(e)}")
+                            
+                            # Show raw output files if available
+                            raw_files = [f for f in os.listdir(temp_dir) if f.startswith("raw_output_")]
+                            if raw_files:
+                                st.subheader("Raw Extraction Results")
+                                st.info("The structured data couldn't be parsed, but here are the raw extraction results:")
+                                
+                                for raw_file in raw_files:
+                                    with st.expander(f"Raw data from: {raw_file.replace('raw_output_', '')}"):
+                                        try:
+                                            with open(os.path.join(temp_dir, raw_file), 'r', encoding='utf-8') as f:
+                                                st.text(f.read())
+                                        except Exception as file_error:
+                                            st.error(f"Error reading raw file: {str(file_error)}")
                     else:
                         st.error("Failed to extract information from the documents.")
 

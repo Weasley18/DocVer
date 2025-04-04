@@ -89,11 +89,37 @@ def run(folder_path, fields_to_extract, output_file):
         # Run the crew and get results
         result = extraction_crew.kickoff()
         
+        # Convert CrewOutput to string if needed
+        try:
+            # First try to access the result content properly
+            if hasattr(result, 'raw') and result.raw:
+                result_str = result.raw
+            elif hasattr(result, 'output') and result.output:
+                result_str = result.output
+            elif hasattr(result, 'content') and result.content:
+                result_str = result.content
+            else:
+                # Fallback to string conversion
+                result_str = str(result)
+        except Exception as e:
+            print(f"Error accessing CrewOutput content: {str(e)}")
+            result_str = str(result)
+        
+        # Debug print to help diagnose issues
+        print(f"Raw result from LLM (first 100 chars): {result_str[:100]}...")
+        
+        # Always save the raw output to a text file for debugging
+        raw_output_dir = os.path.dirname(output_file)
+        raw_output_file = os.path.join(raw_output_dir, f"raw_output_{os.path.basename(pdf_file)}.txt")
+        with open(raw_output_file, "w", encoding="utf-8") as f:
+            f.write(result_str)
+        
+        print(f"Saved raw output to {raw_output_file}")
+        
         # Process the result (assuming it's a valid JSON string)
         try:
             # Parse the JSON result properly
             # First, try to find JSON in the response if it's not already in JSON format
-            result_str = result
             if not result_str.strip().startswith('{'):
                 # Try to find the JSON part in the response
                 start_idx = result_str.find('{')
@@ -101,7 +127,48 @@ def run(folder_path, fields_to_extract, output_file):
                 if start_idx != -1 and end_idx != -1:
                     result_str = result_str[start_idx:end_idx+1]
             
-            extracted_data = json.loads(result_str)
+            # Handle cases where the result contains a JSON object followed by text
+            if '}' in result_str and result_str.rfind('}') < len(result_str) - 1:
+                # Extract just the JSON part
+                result_str = result_str[:result_str.rfind('}')+1]
+            
+            # Special case handling: if there's a message about no data at the end,
+            # it should be separated from the JSON content
+            if "No data was successfully extracted" in result_str and result_str:
+                print("Found both JSON data and 'No data' message - using the JSON data")
+            
+            # Attempt to clean up any non-JSON markup
+            try:
+                extracted_data = json.loads(result_str)
+            except json.JSONDecodeError as e:
+                print(f"JSONDecodeError: {e}")
+                # Try a more aggressive approach to find and extract JSON
+                import re
+                
+                # First, check for common CrewAI output patterns
+                # Sometimes CrewAI output is wrapped in markdown or has a prefix
+                json_matches = []
+                
+                # Look for content in triple backticks with json
+                code_blocks = re.findall(r'```(?:json)?\s*([\s\S]*?)```', result_str)
+                for block in code_blocks:
+                    try:
+                        extracted_data = json.loads(block.strip())
+                        print("Found JSON in code block")
+                        break
+                    except:
+                        pass
+                
+                # If that fails, try more generic pattern matching
+                if 'extracted_data' not in locals():
+                    json_pattern = r'\{(?:[^{}]|(?:\{(?:[^{}]|(?:\{(?:[^{}]|(?:\{[^{}]*\}))*\}))*\}))*\}'
+                    matches = re.findall(json_pattern, result_str)
+                    if matches:
+                        # Use the longest match as it's most likely the complete JSON
+                        result_str = max(matches, key=len)
+                        extracted_data = json.loads(result_str)
+                    else:
+                        raise
             
             # Clean and structure the extracted data
             cleaned_data = {}
@@ -124,7 +191,7 @@ def run(folder_path, fields_to_extract, output_file):
             results.append(cleaned_data)
         except Exception as e:
             print(f"Error processing result from {pdf_file}: {str(e)}")
-            print(f"Raw result: {result}")
+            print(f"Raw result: {result_str}")
     
     # Save results to CSV or Excel
     if results:
@@ -147,6 +214,13 @@ def run(folder_path, fields_to_extract, output_file):
             df.to_csv(output_file, index=False)
         
         print(f"Extraction complete. Results saved to {output_file} and {json_output_file}")
+        
+        # Display the raw results for debugging
+        for result in results:
+            print(f"Extracted from {result.get('File', 'unknown')}:")
+            for field, value in result.items():
+                if field != 'File':
+                    print(f"  {field}: {value[:100]}..." if len(str(value)) > 100 else f"  {field}: {value}")
     else:
         print("No data was successfully extracted from the documents.")
 
